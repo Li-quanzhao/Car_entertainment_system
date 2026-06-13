@@ -1,0 +1,56 @@
+{
+  "_comment": "车载模拟数据配置 - 所有工具函数的 Mock 返回值",
+
+  "vehicle_speed": {
+    "min": 0,
+    "max": 120,
+    "default": 65,
+    "unit": "km/h",
+    "randomize": true
+  },
+  "fuel_level": {
+    "min": 0.0,
+    "max": 1.0,
+    "default": 0.72,
+    "percent_default": 72,
+    "range_km": 480,
+    "randomize": true
+  },
+  "mileage": {
+    "min": 0,
+    "max": 99999,
+    "default": 12345,
+    "unit": "km",
+    "randomize": false
+  },
+  "temperature": {
+    "min": 16,
+    "max": 32,
+    "default": 24
+  },
+  "navigation": {
+    "default_eta_minutes": 25,
+    "default_distance_km": 18.5
+  },
+  "pois": {
+    "加油站": [
+      { "name": "中石化加油站", "address": "朝阳路100号", "distance": "1.2km" },
+      { "name": "中石油加油站", "address": "解放路200号", "distance": "2.5km" }
+    ],
+    "停车场": [
+      { "name": "万达停车场", "address": "建国路88号", "distance": "0.8km" },
+      { "name": "华联停车场", "address": "西单北大街50号", "distance": "1.5km" }
+    ],
+    "餐厅": [
+      { "name": "老北京炸酱面", "address": "王府井大街50号", "distance": "2.3km" },
+      { "name": "川味轩火锅", "address": "东直门内大街30号", "distance": "3.1km" }
+    ],
+    "充电站": [
+      { "name": "特来电充电站", "address": "望京西路10号", "distance": "1.8km" },
+      { "name": "国网充电站", "address": "朝阳北路66号", "distance": "2.2km" }
+    ]
+  },
+  "media": {
+    "play_prefix": "正在播放"
+  }
+}
