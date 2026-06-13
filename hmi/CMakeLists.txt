@@ -19,6 +19,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Sql
     Network
     Concurrent
+    Test
 )
 
 # ============================================================
@@ -82,4 +83,23 @@ target_link_libraries(car_hmi PRIVATE
     Qt6::Concurrent
     Bthprops
     Ws2_32
+)
+
+# ============================================================
+# 单元测试
+# ============================================================
+add_executable(test_hmi
+    src/infrastructure/config_manager.h
+    src/infrastructure/config_manager.cpp
+    tests/test_config.cpp
+)
+
+target_include_directories(test_hmi PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/infrastructure
+)
+
+target_link_libraries(test_hmi PRIVATE
+    Qt6::Test
+    Qt6::Network
 )

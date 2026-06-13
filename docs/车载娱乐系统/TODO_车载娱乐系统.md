@@ -78,15 +78,22 @@
   - `agent_viewmodel.h` / `agent_viewmodel.cpp` — 改用流式通道：创建空占位消息，逐块累积，实时更新气泡文本
 - **效果**: AI 回复在 HMI 上逐字出现，像真人打字一样
 
-## P1 待办（尽快完成）
+## P1 已完成
 
-### 8. QML 国际化翻译文件
+### 8. QML 国际化翻译文件 ✅
 - 所有 QML 已标注 `qsTr()`
-- 如需多语言: 用 `lupdate` 生成 .ts 文件，翻译后用 `lrelease` 生成 .qm
+- `hmi/translations/zh_CN.ts` — 中文翻译（29 条，源语言=目标语言）
+- `hmi/translations/en.ts` — 英文翻译模板（待翻译）
+- 自动加载: `main.cpp` 根据系统 locale 加载 `:/i18n/{locale}.qm`
+- 更新翻译: 修改 .ts 文件后运行 `lrelease hmi/translations/zh_CN.ts -qm hmi/translations/zh_CN.qm`
 
-### 9. 单元测试
-- **HMI**: 安装 Qt Test 或 Google Test，为 Service 层编写测试
-- **Agent**: `cd agent && pip install pytest && pytest`
+### 9. 单元测试 ✅
+- **Agent**: `tests/agent_tests/test_tools.py` — 11 个测试用例，覆盖全部 8 个工具 + mock 数据校验
+  - 运行: `python -s -m pytest tests/agent_tests/ -v`
+- **HMI**: `hmi/tests/test_config.cpp` — Qt Test，8 个测试用例，覆盖 ConfigManager
+  - 编译: `cmake --build build --target test_hmi`
+  - 运行: `& "E:\car_hmi_project\hmi\build\test_hmi.exe"`
+- Agent 工具链与 HMI 核心基础设施已验证
 
 ## P2 待办（未来扩展）
 

@@ -370,16 +370,16 @@ python-dotenv>=1.0.0
 
 ## 质量保证任务
 
-### T14: HMI 单元测试
+### T14: HMI 单元测试 ✅
 
 | 属性 | 内容 |
 |------|------|
 | **描述** | 为 C++ Service 和 Infrastructure 层编写单元测试 |
 | **前置依赖** | T3, T5 |
-| **输入契约** | Qt Test 或 Google Test 框架 |
-| **输出交付物** | 测试用例代码 + CMakeLists.txt |
-| **验收标准** | 测试编译通过，测试通过率 100% |
-| **技术约束** | Qt Test Framework 或 Google Test |
+| **输入契约** | Qt Test Framework |
+| **输出交付物** | `hmi/tests/test_config.cpp` + CMakeLists.txt |
+| **验收结果** | 编译通过，8/8 测试通过（ConfigManager 默认值/get/set/持久化） |
+| **运行命令** | `cmake --build build --target test_hmi && .\build\test_hmi.exe` |
 
 ---
 

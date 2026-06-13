@@ -2,6 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QSurfaceFormat>
+#include <QTranslator>
+#include <QLocale>
 
 #include "service/agent_http_client.h"
 #include "viewmodel/player_viewmodel.h"
@@ -17,6 +19,19 @@ int main(int argc, char *argv[])
     app.setApplicationName("CarHMI");
     app.setApplicationVersion("1.0.0");
     app.setOrganizationName("CarEntertainment");
+
+    // ============================================================
+    // 加载翻译
+    // ============================================================
+    QTranslator translator;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &locale : uiLanguages) {
+        const QString name = QLocale(locale).name();
+        if (translator.load(":/i18n/" + name)) {
+            app.installTranslator(&translator);
+            break;
+        }
+    }
 
     // Qt Quick 启用抗锯齿
     QSurfaceFormat format;
