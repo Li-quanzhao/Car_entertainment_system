@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
-// 蓝牙电话页面
+// 蓝牙电话页面 — 渐变科技风
 Item {
     id: page
     anchors.fill: parent
@@ -13,21 +13,17 @@ Item {
         anchors.margins: 16
         spacing: 24
 
-        // ============================================================
         // 左侧：设备列表
-        // ============================================================
-        Rectangle {
+        SciFiCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: parent.width * 0.4
-            color: root.colorSurface
-            radius: 12
+            clip: true
 
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // 标题栏
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
@@ -37,31 +33,34 @@ Item {
 
                     Label {
                         text: qsTr("蓝牙设备")
-                        color: root.colorText
+                        color: root.colorPrimary
                         font.pixelSize: 14
                         font.bold: true
+                        opacity: 0.85
                         Layout.fillWidth: true
                     }
 
-                    Button {
-                        text: bluetoothVM.discovering ? qsTr("扫描中...") : qsTr("扫描")
-                        font.pixelSize: 11
-                        enabled: !bluetoothVM.discovering
-                        onClicked: bluetoothVM.startDiscovery()
+                    Rectangle {
                         Layout.preferredHeight: 30
+                        Layout.preferredWidth: scanBtnText.implicitWidth + 24
+                        radius: 6
+                        color: "transparent"
+                        border.color: root.colorPrimary
+                        border.width: 1
+                        opacity: bluetoothVM.discovering ? 0.3 : 0.8
 
-                        background: Rectangle {
-                            radius: 6
-                            color: parent.hovered ? root.colorPrimary : "transparent"
-                            border.color: root.colorPrimary
-                            border.width: 1
+                        Label {
+                            id: scanBtnText
+                            anchors.centerIn: parent
+                            text: bluetoothVM.discovering ? qsTr("扫描中...") : qsTr("扫描")
+                            color: root.colorPrimary
+                            font.pixelSize: 11
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: bluetoothVM.discovering ? root.colorTextSec : root.colorPrimary
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: !bluetoothVM.discovering
+                            onClicked: bluetoothVM.startDiscovery()
                         }
                     }
                 }
@@ -72,7 +71,6 @@ Item {
                     color: root.colorSeparator
                 }
 
-                // 设备列表
                 ListView {
                     id: deviceList
                     Layout.fillWidth: true
@@ -94,134 +92,104 @@ Item {
                         RowLayout {
                             anchors {
                                 fill: parent
-                                leftMargin: 16
-                                rightMargin: 16
+                                leftMargin: 16; rightMargin: 16
                             }
                             spacing: 12
 
-                            Label {
-                                text: "\uD83D\uDCF1"
-                                font.pixelSize: 20
-                            }
+                            Label { text: "\uD83D\uDCF1"; font.pixelSize: 20 }
 
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: 2
-
                                 Label {
-                                    text: modelData.name || ""
-                                    color: root.colorText
-                                    font.pixelSize: 13
-                                    elide: Text.ElideRight
+                                    text: modelData.name || ""; color: root.colorText
+                                    font.pixelSize: 13; elide: Text.ElideRight
                                     Layout.fillWidth: true
                                 }
                                 Label {
-                                    text: modelData.address || ""
-                                    color: root.colorTextSec
-                                    font.pixelSize: 10
-                                    font.family: "monospace"
+                                    text: modelData.address || ""; color: root.colorTextSec
+                                    font.pixelSize: 10; font.family: "monospace"
                                 }
                             }
 
-                            Button {
-                                text: (bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || ""))
-                                      ? qsTr("断开") : qsTr("连接")
-                                font.pixelSize: 11
-                                Layout.preferredWidth: 52
-                                Layout.preferredHeight: 28
+                            Rectangle {
+                                Layout.preferredWidth: 52; Layout.preferredHeight: 28
+                                radius: 4
                                 visible: modelData.address !== ""
+                                color: (bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || ""))
+                                       ? root.colorDanger : root.colorPrimary
 
-                                onClicked: {
-                                    if (bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || "")) {
-                                        bluetoothVM.disconnectDevice()
-                                    } else {
-                                        bluetoothVM.connectToDevice(modelData.address, modelData.name)
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: (bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || ""))
+                                          ? qsTr("断开") : qsTr("连接")
+                                    color: "white"; font.pixelSize: 11
+                                }
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        if (bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || ""))
+                                            bluetoothVM.disconnectDevice()
+                                        else
+                                            bluetoothVM.connectToDevice(modelData.address, modelData.name)
                                     }
-                                }
-
-                                background: Rectangle {
-                                    radius: 4
-                                    color: bluetoothVM.connected && bluetoothVM.deviceName === (modelData.name || "")
-                                           ? root.colorDanger : root.colorPrimary
-                                }
-                                contentItem: Label {
-                                    text: parent.text
-                                    color: "white"
-                                    font: parent.font
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
                                 }
                             }
                         }
 
                         MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
+                            id: mouseArea; anchors.fill: parent; hoverEnabled: true
                         }
                     }
 
-                    // 空状态
                     Label {
                         anchors.centerIn: parent
                         text: bluetoothVM.discovering ? qsTr("正在扫描...") : qsTr("点击扫描查找设备")
-                        color: root.colorTextSec
-                        font.pixelSize: 13
+                        color: root.colorTextSec; font.pixelSize: 13
                         visible: deviceList.count === 0
                     }
 
                     ScrollBar.vertical: ScrollBar {
-                        active: true
-                        policy: ScrollBar.AsNeeded
+                        active: true; policy: ScrollBar.AsNeeded
                     }
                 }
             }
         }
 
-        // ============================================================
         // 右侧：连接状态 + 拨号盘
-        // ============================================================
-        Rectangle {
+        SciFiCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: root.colorSurface
-            radius: 12
 
             ColumnLayout {
-                anchors {
-                    fill: parent
-                    margins: 24
-                }
+                anchors { fill: parent; margins: 24 }
                 spacing: 16
 
                 Item { Layout.fillHeight: true }
 
-                // 连接状态
                 ColumnLayout {
                     Layout.alignment: Qt.AlignHCenter
                     spacing: 8
 
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        width: 80
-                        height: 80
-                        radius: 40
-                        color: bluetoothVM.connected ? root.colorSuccess : root.colorSeparator
+                        width: 80; height: 80; radius: 40
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: root.gradCyan }
+                            GradientStop { position: 1; color: root.gradPurple }
+                        }
 
                         Label {
                             anchors.centerIn: parent
-                            text: "\u260E"
-                            color: "white"
-                            font.pixelSize: 36
+                            text: "\u260E"; color: "white"; font.pixelSize: 36
                         }
                     }
 
                     Label {
                         Layout.alignment: Qt.AlignHCenter
                         text: bluetoothVM.connected ? bluetoothVM.deviceName : qsTr("未连接")
-                        color: root.colorText
-                        font.pixelSize: 16
-                        font.bold: true
+                        color: root.colorText; font.pixelSize: 16; font.bold: true
                     }
                     Label {
                         Layout.alignment: Qt.AlignHCenter
@@ -233,141 +201,93 @@ Item {
 
                 Item { Layout.preferredHeight: 16 }
 
-                // 拨号盘
                 GridLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    columns: 3
-                    rowSpacing: 8
-                    columnSpacing: 8
+                    columns: 3; rowSpacing: 8; columnSpacing: 8
 
                     Repeater {
-                        model: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "*", "0", "#"]
+                        model: ["1","2","3","4","5","6","7","8","9","*","0","#"]
+                        delegate: Rectangle {
+                            implicitWidth: 56; implicitHeight: 48; radius: 8
+                            color: mouseDial.containsMouse ? root.colorPrimary : root.colorSeparator
+                            opacity: mouseDial.containsMouse ? 0.15 : 0.4
 
-                        Button {
-                            text: modelData
-                            font.pixelSize: 18
-                            implicitWidth: 56
-                            implicitHeight: 48
-                            enabled: bluetoothVM.connected
-
-                            onClicked: phoneInput.text += modelData
-
-                            background: Rectangle {
-                                radius: 8
-                                color: parent.hovered ? root.colorPrimary : root.colorSeparator
-                                opacity: parent.hovered ? 0.15 : 0.5
+                            Label {
+                                anchors.centerIn: parent
+                                text: modelData; color: root.colorText; font.pixelSize: 18
                             }
-                            contentItem: Label {
-                                text: parent.text
-                                color: root.colorText
-                                font: parent.font
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
+                            MouseArea {
+                                id: mouseDial; anchors.fill: parent; hoverEnabled: true
+                                enabled: bluetoothVM.connected
+                                onClicked: phoneInput.text += modelData
                             }
                         }
                     }
                 }
 
-                // 号码显示
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    Layout.fillWidth: true
-                    Layout.maximumWidth: 250
+                    Layout.fillWidth: true; Layout.maximumWidth: 250
                     spacing: 8
 
-                    TextField {
-                        id: phoneInput
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("输入号码")
-                        color: root.colorText
-                        font.pixelSize: 16
-                        horizontalAlignment: Text.AlignHCenter
-                        readOnly: true
+                    Rectangle {
+                        Layout.fillWidth: true; Layout.preferredHeight: 40
+                        radius: 8; color: root.colorBg
+                        border.color: root.colorSeparator; border.width: 1
 
-                        background: Rectangle {
-                            radius: 6
-                            color: root.colorBg
-                            border.color: root.colorSeparator
-                        }
-
-                        // 退格
-                        Keys.onPressed: {
-                            if (event.key === Qt.Key_Backspace) {
-                                phoneInput.text = phoneInput.text.slice(0, -1)
-                            }
+                        TextInput {
+                            id: phoneInput
+                            anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
+                            color: root.colorText; font.pixelSize: 16
+                            verticalAlignment: TextInput.AlignVCenter
+                            readOnly: true
                         }
                     }
 
-                    Button {
-                        text: "\u232B"
-                        font.pixelSize: 14
-                        implicitWidth: 36
-                        implicitHeight: 36
+                    Rectangle {
+                        implicitWidth: 36; implicitHeight: 36; radius: 4
+                        color: mouseDel.containsMouse ? root.colorSeparator : "transparent"
 
-                        onClicked: phoneInput.text = phoneInput.text.slice(0, -1)
-
-                        background: Rectangle {
-                            radius: 4
-                            color: parent.hovered ? root.colorSeparator : "transparent"
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\u232B"; color: root.colorText; font.pixelSize: 14
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: root.colorText
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                        MouseArea {
+                            id: mouseDel; anchors.fill: parent; hoverEnabled: true
+                            onClicked: phoneInput.text = phoneInput.text.slice(0, -1)
                         }
                     }
                 }
 
-                // 拨号按钮
                 RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 16
+                    Layout.alignment: Qt.AlignHCenter; spacing: 16
 
-                    Button {
-                        text: "\uD83D\uDCDE"
-                        font.pixelSize: 22
-                        implicitWidth: 64
-                        implicitHeight: 48
-                        enabled: bluetoothVM.connected && phoneInput.text.length > 0
+                    Rectangle {
+                        implicitWidth: 64; implicitHeight: 48; radius: 8
+                        color: root.colorSuccess; opacity: phoneInput.text.length > 0 ? 1 : 0.3
 
-                        onClicked: bluetoothVM.dial(phoneInput.text)
-
-                        background: Rectangle {
-                            radius: 8
-                            color: root.colorSuccess
-                            opacity: parent.enabled ? 1 : 0.3
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\uD83D\uDCDE"; color: "white"; font.pixelSize: 22
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: "white"
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                        MouseArea {
+                            anchors.fill: parent
+                            enabled: bluetoothVM.connected && phoneInput.text.length > 0
+                            onClicked: bluetoothVM.dial(phoneInput.text)
                         }
                     }
 
-                    Button {
-                        text: "\uD83D\uDCD5"
-                        font.pixelSize: 22
-                        implicitWidth: 64
-                        implicitHeight: 48
-                        enabled: bluetoothVM.connected
+                    Rectangle {
+                        implicitWidth: 64; implicitHeight: 48; radius: 8
+                        color: root.colorDanger; opacity: 0.8
 
-                        onClicked: bluetoothVM.endCall()
-
-                        background: Rectangle {
-                            radius: 8
-                            color: root.colorDanger
-                            opacity: parent.enabled ? 1 : 0.3
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\uD83D\uDCD5"; color: "white"; font.pixelSize: 22
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: "white"
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                        MouseArea {
+                            anchors.fill: parent; enabled: bluetoothVM.connected
+                            onClicked: bluetoothVM.endCall()
                         }
                     }
                 }

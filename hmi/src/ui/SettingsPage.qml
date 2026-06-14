@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
-// 系统设置页面
+// 系统设置页面 — 渐变科技风
 Item {
     id: page
     anchors.fill: parent
@@ -14,63 +14,39 @@ Item {
         clip: true
 
         ScrollBar.vertical: ScrollBar {
-            active: true
-            policy: ScrollBar.AsNeeded
+            active: true; policy: ScrollBar.AsNeeded
         }
 
         ColumnLayout {
             id: contentLayout
-            anchors {
-                left: parent.left
-                right: parent.right
-                margins: 16
-            }
+            anchors { left: parent.left; right: parent.right; margins: 16 }
             spacing: 16
 
-            // 标题
             Label {
                 Layout.topMargin: 8
                 text: qsTr("系统设置")
-                color: root.colorText
-                font.pixelSize: 20
-                font.bold: true
+                color: root.colorPrimary; font.pixelSize: 20; font.bold: true
+                opacity: 0.85
             }
 
-            // ============================================================
-            // 主题设置
-            // ============================================================
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                color: root.colorSurface
-                radius: 12
+            // 主题
+            SciFiCard {
+                Layout.fillWidth: true; Layout.preferredHeight: 80
 
                 RowLayout {
-                    anchors {
-                        fill: parent
-                        margins: 16
-                    }
+                    anchors { fill: parent; margins: 16 }
                     spacing: 16
 
-                    Label {
-                        text: "\uD83C\uDF19"
-                        font.pixelSize: 28
-                    }
+                    Label { text: "\uD83C\uDF19"; font.pixelSize: 28 }
 
                     ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
+                        Layout.fillWidth: true; spacing: 2
                         Label {
-                            text: qsTr("主题模式")
-                            color: root.colorText
-                            font.pixelSize: 14
-                            font.bold: true
+                            text: qsTr("主题模式"); color: root.colorText
+                            font.pixelSize: 14; font.bold: true
                         }
                         Label {
-                            text: qsTr("深色 / 浅色")
-                            color: root.colorTextSec
-                            font.pixelSize: 11
+                            text: qsTr("深色 / 浅色"); color: root.colorTextSec; font.pixelSize: 11
                         }
                     }
 
@@ -79,32 +55,24 @@ Item {
                         model: settingsVM.themes
                         currentIndex: settingsVM.theme === "light" ? 1 : 0
                         font.pixelSize: 13
-
                         onActivated: settingsVM.setTheme(currentText)
 
                         background: Rectangle {
-                            radius: 6
-                            color: root.colorBg
+                            radius: 6; color: root.colorBg
                             border.color: root.colorSeparator
                         }
                         contentItem: Label {
                             text: settingsVM.theme === "light" ? qsTr("浅色") : qsTr("深色")
-                            color: root.colorText
-                            font: themeCombo.font
-                            verticalAlignment: Text.AlignVCenter
-                            leftPadding: 10
+                            color: root.colorText; font: themeCombo.font
+                            verticalAlignment: Text.AlignVCenter; leftPadding: 10
                         }
-
                         delegate: ItemDelegate {
                             width: themeCombo.width
                             text: modelData === "light" ? qsTr("浅色") : qsTr("深色")
                             font: themeCombo.font
-
                             contentItem: Label {
-                                text: parent.text
-                                color: root.colorText
-                                font: parent.font
-                                verticalAlignment: Text.AlignVCenter
+                                text: parent.text; color: root.colorText
+                                font: parent.font; verticalAlignment: Text.AlignVCenter
                             }
                             background: Rectangle {
                                 color: parent.hovered ? root.colorSeparator : root.colorSurface
@@ -114,41 +82,24 @@ Item {
                 }
             }
 
-            // ============================================================
-            // 语言设置
-            // ============================================================
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                color: root.colorSurface
-                radius: 12
+            // 语言
+            SciFiCard {
+                Layout.fillWidth: true; Layout.preferredHeight: 80
 
                 RowLayout {
-                    anchors {
-                        fill: parent
-                        margins: 16
-                    }
+                    anchors { fill: parent; margins: 16 }
                     spacing: 16
 
-                    Label {
-                        text: "\uD83C\uDF10"
-                        font.pixelSize: 28
-                    }
+                    Label { text: "\uD83C\uDF10"; font.pixelSize: 28 }
 
                     ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
+                        Layout.fillWidth: true; spacing: 2
                         Label {
-                            text: qsTr("语言")
-                            color: root.colorText
-                            font.pixelSize: 14
-                            font.bold: true
+                            text: qsTr("语言"); color: root.colorText
+                            font.pixelSize: 14; font.bold: true
                         }
                         Label {
-                            text: qsTr("中文 / English")
-                            color: root.colorTextSec
-                            font.pixelSize: 11
+                            text: qsTr("中文 / English"); color: root.colorTextSec; font.pixelSize: 11
                         }
                     }
 
@@ -157,32 +108,22 @@ Item {
                         model: settingsVM.languages
                         currentIndex: settingsVM.language === "en" ? 1 : 0
                         font.pixelSize: 13
-
                         onActivated: settingsVM.setLanguage(currentText)
 
                         background: Rectangle {
-                            radius: 6
-                            color: root.colorBg
+                            radius: 6; color: root.colorBg
                             border.color: root.colorSeparator
                         }
                         contentItem: Label {
                             text: settingsVM.language === "en" ? "English" : "中文"
-                            color: root.colorText
-                            font: langCombo.font
-                            verticalAlignment: Text.AlignVCenter
-                            leftPadding: 10
+                            color: root.colorText; font: langCombo.font
+                            verticalAlignment: Text.AlignVCenter; leftPadding: 10
                         }
-
                         delegate: ItemDelegate {
-                            width: langCombo.width
-                            text: modelData
-                            font: langCombo.font
-
+                            width: langCombo.width; text: modelData; font: langCombo.font
                             contentItem: Label {
-                                text: parent.text
-                                color: root.colorText
-                                font: parent.font
-                                verticalAlignment: Text.AlignVCenter
+                                text: parent.text; color: root.colorText
+                                font: parent.font; verticalAlignment: Text.AlignVCenter
                             }
                             background: Rectangle {
                                 color: parent.hovered ? root.colorSeparator : root.colorSurface
@@ -192,114 +133,78 @@ Item {
                 }
             }
 
-            // ============================================================
-            // 音量设置
-            // ============================================================
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 80
-                color: root.colorSurface
-                radius: 12
+            // 音量
+            SciFiCard {
+                Layout.fillWidth: true; Layout.preferredHeight: 80
 
                 RowLayout {
-                    anchors {
-                        fill: parent
-                        margins: 16
-                    }
+                    anchors { fill: parent; margins: 16 }
                     spacing: 16
 
-                    Label {
-                        text: "\uD83D\uDD0A"
-                        font.pixelSize: 28
-                    }
+                    Label { text: "\uD83D\uDD0A"; font.pixelSize: 28 }
 
                     ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
-
+                        Layout.fillWidth: true; spacing: 2
                         Label {
-                            text: qsTr("系统音量")
-                            color: root.colorText
-                            font.pixelSize: 14
-                            font.bold: true
+                            text: qsTr("系统音量"); color: root.colorText
+                            font.pixelSize: 14; font.bold: true
                         }
                         Label {
                             text: Math.round(settingsVM.volume * 100) + "%"
-                            color: root.colorTextSec
-                            font.pixelSize: 11
+                            color: root.colorTextSec; font.pixelSize: 11
                         }
                     }
 
                     Slider {
                         id: volumeSlider
-                        Layout.fillWidth: true
-                        Layout.maximumWidth: 160
-                        from: 0
-                        to: 100
-                        value: settingsVM.volume * 100
+                        Layout.fillWidth: true; Layout.maximumWidth: 160
+                        from: 0; to: 100; value: settingsVM.volume * 100
                         onMoved: settingsVM.setVolume(value / 100)
 
                         background: Rectangle {
-                            implicitHeight: 4
-                            radius: 2
-                            color: root.colorSeparator
+                            implicitHeight: 4; radius: 2; color: root.colorSeparator
                             Rectangle {
                                 width: volumeSlider.visualPosition * parent.width
-                                height: parent.height
-                                radius: 2
-                                color: root.colorPrimary
+                                height: parent.height; radius: 2
+                                gradient: Gradient {
+                                    GradientStop { position: 0; color: root.gradCyan }
+                                    GradientStop { position: 1; color: root.gradPurple }
+                                }
                             }
                         }
                         handle: Rectangle {
-                            x: volumeSlider.visualPosition
-                               * (volumeSlider.availableWidth - width)
+                            x: volumeSlider.visualPosition * (volumeSlider.availableWidth - width)
                             y: (volumeSlider.availableHeight - height) / 2
-                            width: 14
-                            height: 14
-                            radius: 7
+                            width: 14; height: 14; radius: 7
                             color: root.colorPrimary
                         }
                     }
                 }
             }
 
-            // ============================================================
-            // 系统信息
-            // ============================================================
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 100
-                color: root.colorSurface
-                radius: 12
+            // 关于
+            SciFiCard {
+                Layout.fillWidth: true; Layout.preferredHeight: 100
 
                 ColumnLayout {
-                    anchors {
-                        fill: parent
-                        margins: 16
-                    }
+                    anchors { fill: parent; margins: 16 }
                     spacing: 4
 
                     Label {
-                        text: qsTr("关于")
-                        color: root.colorText
-                        font.pixelSize: 14
-                        font.bold: true
+                        text: qsTr("关于"); color: root.colorPrimary
+                        font.pixelSize: 14; font.bold: true; opacity: 0.85
                     }
-
                     Label {
                         text: qsTr("Car Entertainment System")
-                        color: root.colorTextSec
-                        font.pixelSize: 12
+                        color: root.colorTextSec; font.pixelSize: 12
                     }
                     Label {
                         text: qsTr("版本 1.0.0 | Qt 6.11.1 | C++17")
-                        color: root.colorTextSec
-                        font.pixelSize: 11
+                        color: root.colorTextSec; font.pixelSize: 11
                     }
                     Label {
                         text: qsTr("MinGW 16.1.0 | Windows")
-                        color: root.colorTextSec
-                        font.pixelSize: 11
+                        color: root.colorTextSec; font.pixelSize: 11
                     }
                 }
             }

@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file alias="main.qml">../src/ui/main.qml</file>
         <file alias="NavBar.qml">../src/ui/NavBar.qml</file>
+        <file alias="SciFiCard.qml">../src/ui/SciFiCard.qml</file>
         <file alias="PlayerPage.qml">../src/ui/PlayerPage.qml</file>
         <file alias="NavigationPage.qml">../src/ui/NavigationPage.qml</file>
         <file alias="BluetoothPage.qml">../src/ui/BluetoothPage.qml</file>

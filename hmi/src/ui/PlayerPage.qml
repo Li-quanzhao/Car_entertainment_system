@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
-// 音乐播放器页面 (T7)
+// 音乐播放器 — 渐变科技风
 Item {
     id: page
     anchors.fill: parent
@@ -11,34 +11,31 @@ Item {
     RowLayout {
         anchors.fill: parent
         anchors.margins: 16
-        spacing: 24
+        spacing: 20
 
         // ============================================================
         // 左侧：歌曲列表
         // ============================================================
-        Rectangle {
+        SciFiCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: parent.width * 0.35
-            color: root.colorSurface
-            radius: 12
-
             clip: true
 
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // 列表标题
                 Label {
                     Layout.fillWidth: true
-                    Layout.topMargin: 12
+                    Layout.topMargin: 14
                     Layout.leftMargin: 16
-                    Layout.bottomMargin: 8
+                    Layout.bottomMargin: 10
                     text: qsTr("播放列表")
-                    color: root.colorText
+                    color: root.colorPrimary
                     font.pixelSize: 14
                     font.bold: true
+                    opacity: 0.85
                 }
 
                 Rectangle {
@@ -66,7 +63,7 @@ Item {
                             radius: 8
                             color: ListView.isCurrentItem
                                    ? root.colorPrimary : "transparent"
-                            opacity: ListView.isCurrentItem ? 0.15 : 0
+                            opacity: ListView.isCurrentItem ? 0.1 : 0
                         }
 
                         ColumnLayout {
@@ -105,52 +102,77 @@ Item {
 
                         Rectangle {
                             anchors.bottom: parent.bottom
-                            width: parent.width
+                            width: parent.width - 16
+                            anchors.horizontalCenter: parent.horizontalCenter
                             height: 1
                             color: root.colorSeparator
+                            opacity: 0.5
                         }
                     }
 
                     ScrollBar.vertical: ScrollBar {
-                        active: true
-                        policy: ScrollBar.AsNeeded
+                        active: true; policy: ScrollBar.AsNeeded
                     }
                 }
             }
         }
 
         // ============================================================
-        // 右侧：当前播放 + 控制区
+        // 右侧：播放区
         // ============================================================
-        Rectangle {
+        SciFiCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            color: root.colorSurface
-            radius: 12
 
             ColumnLayout {
                 anchors {
                     fill: parent
-                    margins: 24
+                    margins: 28
                 }
-                spacing: 16
+                spacing: 12
 
                 Item { Layout.fillHeight: true }
 
-                // 专辑封面占位
-                Rectangle {
+                // 专辑封面 — 发光圆环
+                Item {
                     Layout.alignment: Qt.AlignHCenter
-                    width: 120
-                    height: 120
-                    radius: 12
-                    color: root.colorPrimary
-                    opacity: 0.15
+                    width: 140; height: 140
 
-                    Label {
+                    // 外发光环
+                    Rectangle {
                         anchors.centerIn: parent
-                        text: "\u266B"
+                        width: 130; height: 130
+                        radius: 65
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: root.gradCyan }
+                            GradientStop { position: 0.5; color: root.gradBlue }
+                            GradientStop { position: 1.0; color: root.gradPurple }
+                        }
+                        opacity: 0.25
+
+                        RotationAnimation on rotation {
+                            from: 0; to: 360
+                            duration: 8000
+                            loops: Animation.Infinite
+                            running: playerVM.playing
+                        }
+                    }
+
+                    // 封面圆
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 110; height: 110
+                        radius: 55
                         color: root.colorPrimary
-                        font.pixelSize: 48
+                        opacity: 0.08
+
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\u266B"
+                            color: root.colorPrimary
+                            font.pixelSize: 44
+                            opacity: 0.7
+                        }
                     }
                 }
 
@@ -158,6 +180,7 @@ Item {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
+                    Layout.topMargin: 8
                     text: playerVM.title || qsTr("未选择歌曲")
                     color: root.colorText
                     font.pixelSize: 18
@@ -168,13 +191,14 @@ Item {
                 Label {
                     Layout.alignment: Qt.AlignHCenter
                     text: playerVM.artist || ""
-                    color: root.colorTextSec
+                    color: root.colorPrimary
                     font.pixelSize: 13
+                    opacity: 0.7
                 }
 
-                Item { Layout.preferredHeight: 8 }
+                Item { Layout.preferredHeight: 10 }
 
-                // 进度条
+                // 渐变进度条
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: 8
@@ -199,11 +223,26 @@ Item {
                             implicitHeight: 4
                             radius: 2
                             color: root.colorSeparator
+
+                            // 渐变进度填充
                             Rectangle {
                                 width: progressSlider.visualPosition * parent.width
                                 height: parent.height
                                 radius: 2
+                                gradient: Gradient {
+                                    GradientStop { position: 0.0; color: root.gradCyan }
+                                    GradientStop { position: 1.0; color: root.gradPurple }
+                                }
+                            }
+
+                            // 当前点光晕
+                            Rectangle {
+                                x: progressSlider.visualPosition * (parent.width - 8)
+                                y: -4
+                                width: 8; height: 8
+                                radius: 4
                                 color: root.colorPrimary
+                                opacity: 0.6
                             }
                         }
                         handle: Rectangle {
@@ -225,87 +264,117 @@ Item {
                     }
                 }
 
-                // 播放控制按钮
+                Item { Layout.preferredHeight: 8 }
+
+                // 播放控制按钮 — 霓虹风格
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    spacing: 24
+                    spacing: 20
 
                     // 上一首
-                    RoundButton {
-                        text: "\u23EE"
-                        font.pixelSize: 18
-                        implicitWidth: 40; implicitHeight: 40
-                        flat: true
-                        onClicked: playerVM.previous()
-                        contentItem: Label {
-                            text: parent.text
-                            color: root.colorText
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                    Item {
+                        implicitWidth: 44; implicitHeight: 44
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 22
+                            color: "transparent"
+                            border.color: root.colorTextSec
+                            border.width: 1
+                            opacity: mousePrev.containsMouse ? 0.5 : 0.25
                         }
-                        background: Rectangle {
-                            radius: 20
-                            color: parent.hovered ? root.colorSeparator : "transparent"
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\u23EE"
+                            color: root.colorTextSec
+                            font.pixelSize: 18
+                            opacity: mousePrev.containsMouse ? 1 : 0.6
+                        }
+                        MouseArea {
+                            id: mousePrev
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: playerVM.previous()
                         }
                     }
 
-                    // 播放/暂停
-                    RoundButton {
-                        text: playerVM.playing ? "\u23F8" : "\u25B6"
-                        font.pixelSize: 22
-                        implicitWidth: 56; implicitHeight: 56
-                        onClicked: {
-                            if (playerVM.playing)
-                                playerVM.pause()
-                            else
-                                playerVM.play()
+                    // 播放/暂停 — 渐变发光
+                    Item {
+                        implicitWidth: 60; implicitHeight: 60
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 30
+                            gradient: Gradient {
+                                GradientStop { position: 0.0; color: root.gradCyan }
+                                GradientStop { position: 1.0; color: root.gradBlue }
+                            }
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: root.colorBg
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                        // 发光外圈
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.margins: -3
+                            radius: 33
+                            color: "transparent"
+                            border.color: root.colorPrimary
+                            border.width: 2
+                            opacity: 0.3
                         }
-                        background: Rectangle {
-                            radius: 28
-                            color: root.colorPrimary
+                        Label {
+                            anchors.centerIn: parent
+                            text: playerVM.playing ? "\u23F8" : "\u25B6"
+                            color: "white"
+                            font.pixelSize: 24
+                        }
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+                                playerVM.playing ? playerVM.pause() : playerVM.play()
+                            }
                         }
                     }
 
                     // 下一首
-                    RoundButton {
-                        text: "\u23ED"
-                        font.pixelSize: 18
-                        implicitWidth: 40; implicitHeight: 40
-                        flat: true
-                        onClicked: playerVM.next()
-                        contentItem: Label {
-                            text: parent.text
-                            color: root.colorText
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+                    Item {
+                        implicitWidth: 44; implicitHeight: 44
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 22
+                            color: "transparent"
+                            border.color: root.colorTextSec
+                            border.width: 1
+                            opacity: mouseNext.containsMouse ? 0.5 : 0.25
                         }
-                        background: Rectangle {
-                            radius: 20
-                            color: parent.hovered ? root.colorSeparator : "transparent"
+                        Label {
+                            anchors.centerIn: parent
+                            text: "\u23ED"
+                            color: root.colorTextSec
+                            font.pixelSize: 18
+                            opacity: mouseNext.containsMouse ? 1 : 0.6
+                        }
+                        MouseArea {
+                            id: mouseNext
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: playerVM.next()
                         }
                     }
                 }
 
-                // 音量
+                // 音量控制
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.fillWidth: true
                     Layout.maximumWidth: 200
-                    spacing: 8
+                    Layout.topMargin: 12
+                    spacing: 10
 
                     Label {
                         text: "\uD83D\uDD0A"
                         color: root.colorTextSec
-                        font.pixelSize: 14
+                        font.pixelSize: 15
+                        opacity: 0.6
                     }
 
                     Slider {
@@ -316,23 +385,23 @@ Item {
                         onMoved: playerVM.setVolume(value / 100)
 
                         background: Rectangle {
-                            implicitHeight: 4
-                            radius: 2
+                            implicitHeight: 4; radius: 2
                             color: root.colorSeparator
                             Rectangle {
                                 width: volumeSlider.visualPosition * parent.width
-                                height: parent.height
-                                radius: 2
-                                color: root.colorAccent
+                                height: parent.height; radius: 2
+                                gradient: Gradient {
+                                    GradientStop { position: 0.0; color: root.gradPurple }
+                                    GradientStop { position: 1.0; color: root.gradPink }
+                                }
                             }
                         }
                         handle: Rectangle {
                             x: volumeSlider.visualPosition
                                * (volumeSlider.availableWidth - width)
                             y: (volumeSlider.availableHeight - height) / 2
-                            width: 12; height: 12
-                            radius: 6
-                            color: root.colorAccent
+                            width: 12; height: 12; radius: 6
+                            color: root.gradPurple
                         }
                     }
                 }
@@ -342,7 +411,6 @@ Item {
         }
     }
 
-    // 时间格式化工具函数
     function formatTime(ms) {
         var sec = Math.floor(ms / 1000)
         var m = Math.floor(sec / 60)

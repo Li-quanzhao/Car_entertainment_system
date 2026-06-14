@@ -13,19 +13,36 @@ ApplicationWindow {
     minimumHeight: 480
 
     // ============================================================
-    // 全局颜色方案（由 settingsVM.theme 驱动）
+    // 渐变科技风颜色方案
     // ============================================================
-    readonly property color colorBg:        settingsVM.theme === "light" ? "#f5f5f5" : "#0d1117"
-    readonly property color colorSurface:   settingsVM.theme === "light" ? "#ffffff" : "#161b22"
-    readonly property color colorPrimary:   settingsVM.theme === "light" ? "#1a73e8" : "#58a6ff"
-    readonly property color colorText:      settingsVM.theme === "light" ? "#1f2328" : "#e6edf3"
-    readonly property color colorTextSec:   settingsVM.theme === "light" ? "#656d76" : "#8b949e"
-    readonly property color colorAccent:    settingsVM.theme === "light" ? "#34a853" : "#3fb950"
-    readonly property color colorNavActive: settingsVM.theme === "light" ? "#1a73e8" : "#58a6ff"
-    readonly property color colorNavInactive: settingsVM.theme === "light" ? "#656d76" : "#484f58"
-    readonly property color colorSeparator: settingsVM.theme === "light" ? "#d0d7de" : "#30363d"
+    readonly property color colorBg:        "#080c17"
+    readonly property color colorSurface:   "#111a2e"
+    readonly property color colorPrimary:   "#00d4ff"
+    readonly property color colorAccent:    "#a855f7"
+    readonly property color colorText:      "#e0e8f0"
+    readonly property color colorTextSec:   "#7b89a0"
+    readonly property color colorDanger:    "#ff4466"
+    readonly property color colorSuccess:   "#00e676"
+    readonly property color colorWarning:   "#ffb300"
+    readonly property color colorNavActive:   "#00d4ff"
+    readonly property color colorNavInactive: "#4a5568"
+    readonly property color colorSeparator: "#1e2a45"
 
-    background: Rectangle { color: root.colorBg }
+    // 发光色（用于阴影/光晕模拟）
+    readonly property color glowPrimary:    "#40" + "00d4ff"
+    readonly property color glowAccent:     "#40" + "a855f7"
+    readonly property color glowDanger:     "#40" + "ff4466"
+    readonly property color glowSuccess:    "#40" + "00e676"
+
+    // 渐变（用于多层叠加模拟渐变）
+    readonly property color gradCyan:  "#00d4ff"
+    readonly property color gradBlue:  "#3b82f6"
+    readonly property color gradPurple: "#a855f7"
+    readonly property color gradPink:  "#ec4899"
+
+    background: Rectangle {
+        color: root.colorBg
+    }
 
     // ============================================================
     // 页面路由常量
@@ -37,7 +54,6 @@ ApplicationWindow {
     readonly property int pageSettings:   4
     readonly property int pageAgentChat:  5
 
-    // 页面标题映射
     function pageTitle(page) {
         const titles = [qsTr("音乐"), qsTr("导航"), qsTr("蓝牙"),
                         qsTr("车辆"), qsTr("设置"), qsTr("AI助手")]
@@ -54,13 +70,29 @@ ApplicationWindow {
         // ---------- 顶栏 ----------
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 48
+            Layout.preferredHeight: 50
             color: root.colorSurface
+
+            // 底部发光分割线
+            Rectangle {
+                anchors.bottom: parent.bottom
+                width: parent.width
+                height: 1
+                color: "transparent"
+
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: parent.width
+                    height: 1
+                    color: root.colorPrimary
+                    opacity: 0.3
+                }
+            }
 
             RowLayout {
                 anchors {
-                    left: parent.left; leftMargin: 20
-                    right: parent.right; rightMargin: 20
+                    left: parent.left; leftMargin: 22
+                    right: parent.right; rightMargin: 22
                     verticalCenter: parent.verticalCenter
                 }
 
@@ -75,26 +107,18 @@ ApplicationWindow {
 
                 Label {
                     id: clockLabel
-                    color: root.colorTextSec
-                    font.pixelSize: 14
+                    color: root.colorPrimary
+                    font.pixelSize: 15
+                    font.bold: true
+                    opacity: 0.8
                     Timer {
-                        interval: 1000
-                        repeat: true
-                        running: true
+                        interval: 1000; repeat: true; running: true
                         onTriggered: {
                             var d = new Date()
                             clockLabel.text = d.toLocaleTimeString(Qt.locale(), "HH:mm")
                         }
                     }
                 }
-            }
-
-            // 底部分隔线
-            Rectangle {
-                anchors.bottom: parent.bottom
-                width: parent.width
-                height: 1
-                color: root.colorSeparator
             }
         }
 
@@ -105,12 +129,11 @@ ApplicationWindow {
             Layout.fillHeight: true
             clip: true
 
-            // 替换动画
             replaceEnter: Transition {
                 NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 200 }
             }
             replaceExit: Transition {
-                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 200 }
+                NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 150 }
             }
 
             initialItem: PlayerPage {}
@@ -119,17 +142,16 @@ ApplicationWindow {
         // ---------- 底栏导航 ----------
         NavBar {
             Layout.fillWidth: true
-            Layout.preferredHeight: 60
+            Layout.preferredHeight: 64
         }
     }
 
     // ============================================================
-    // 页面切换（被 NavBar 调用）
+    // 页面切换
     // ============================================================
     function switchPage(pageIndex) {
         if (contentStack.currentIndex === pageIndex)
             return
-
         var page
         switch (pageIndex) {
         case 0: page = Qt.createComponent("PlayerPage.qml");       break
@@ -139,8 +161,6 @@ ApplicationWindow {
         case 4: page = Qt.createComponent("SettingsPage.qml");     break
         case 5: page = Qt.createComponent("AgentChatPage.qml");    break
         }
-        if (page) {
-            contentStack.replace(page)
-        }
+        if (page) { contentStack.replace(page) }
     }
 }

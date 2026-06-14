@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Controls.Basic
 import QtQuick.Layouts
 
-// 导航页面
+// 导航页面 — 渐变科技风
 Item {
     id: page
     anchors.fill: parent
@@ -13,21 +13,17 @@ Item {
         anchors.margins: 16
         spacing: 24
 
-        // ============================================================
-        // 左侧：POI 搜索 + 结果列表
-        // ============================================================
-        Rectangle {
+        // 左侧：POI 搜索
+        SciFiCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: parent.width * 0.4
-            color: root.colorSurface
-            radius: 12
+            clip: true
 
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // 搜索栏
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: 12
@@ -36,297 +32,223 @@ Item {
                     Layout.bottomMargin: 8
                     spacing: 8
 
-                    TextField {
-                        id: searchInput
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("搜索地点...")
-                        color: root.colorText
-                        font.pixelSize: 13
+                    Rectangle {
+                        Layout.fillWidth: true; Layout.preferredHeight: 36
+                        radius: 8; color: root.colorBg
+                        border.color: root.colorSeparator; border.width: 1
 
-                        background: Rectangle {
-                            radius: 8
-                            color: root.colorBg
-                            border.color: root.colorSeparator
+                        TextInput {
+                            id: searchInput
+                            anchors.fill: parent; anchors.leftMargin: 12; anchors.rightMargin: 12
+                            color: root.colorText; font.pixelSize: 13
+                            verticalAlignment: TextInput.AlignVCenter
+                            focus: true
+
+                            Text {
+                                anchors.fill: parent; anchors.leftMargin: 12
+                                text: qsTr("搜索地点...")
+                                color: root.colorTextSec; font.pixelSize: 13
+                                visible: !searchInput.text
+                                verticalAlignment: Text.AlignVCenter
+                            }
                         }
-
-                        onAccepted: navVM.searchPoi(text)
                     }
 
-                    Button {
-                        text: qsTr("搜索")
-                        font.pixelSize: 12
-                        Layout.preferredHeight: 32
-
-                        onClicked: navVM.searchPoi(searchInput.text)
-
-                        background: Rectangle {
-                            radius: 6
-                            color: root.colorPrimary
+                    Rectangle {
+                        Layout.preferredWidth: 60; Layout.preferredHeight: 32
+                        radius: 6
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: root.gradCyan }
+                            GradientStop { position: 1; color: root.gradBlue }
                         }
-                        contentItem: Label {
-                            text: parent.text
-                            color: "white"
-                            font: parent.font
-                            horizontalAlignment: Text.AlignHCenter
-                            verticalAlignment: Text.AlignVCenter
+
+                        Label {
+                            anchors.centerIn: parent
+                            text: qsTr("搜索"); color: "white"; font.pixelSize: 12
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: navVM.searchPoi(searchInput.text)
                         }
                     }
                 }
 
                 Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: root.colorSeparator
+                    Layout.fillWidth: true; height: 1; color: root.colorSeparator
                 }
 
-                // 结果列表
                 ListView {
                     id: resultList
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    model: navVM.poiResults
-                    clip: true
+                    Layout.fillWidth: true; Layout.fillHeight: true
+                    model: navVM.poiResults; clip: true
 
                     delegate: Item {
-                        width: ListView.view.width
-                        height: 64
+                        width: ListView.view.width; height: 64
 
                         Rectangle {
-                            anchors.fill: parent
-                            anchors.margins: 2
+                            anchors.fill: parent; anchors.margins: 2
                             radius: 8
                             color: mouseArea.containsMouse ? root.colorSeparator : "transparent"
                         }
 
                         RowLayout {
-                            anchors {
-                                fill: parent
-                                leftMargin: 16
-                                rightMargin: 16
-                            }
+                            anchors { fill: parent; leftMargin: 16; rightMargin: 16 }
                             spacing: 12
 
                             Rectangle {
-                                width: 40
-                                height: 40
-                                radius: 20
-                                color: root.colorPrimary
-                                opacity: 0.15
+                                width: 40; height: 40; radius: 20
+                                gradient: Gradient {
+                                    GradientStop { position: 0; color: root.gradCyan }
+                                    GradientStop { position: 1; color: root.gradPurple }
+                                }
+                                opacity: 0.2
 
                                 Label {
-                                    anchors.centerIn: parent
-                                    text: "\uD83D\uDCCD"
+                                    anchors.centerIn: parent; text: "\uD83D\uDCCD"
                                     font.pixelSize: 18
                                 }
                             }
 
                             ColumnLayout {
-                                Layout.fillWidth: true
-                                spacing: 2
-
+                                Layout.fillWidth: true; spacing: 2
                                 Label {
-                                    text: modelData.name || ""
-                                    color: root.colorText
-                                    font.pixelSize: 13
-                                    font.bold: true
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
+                                    text: modelData.name || ""; color: root.colorText
+                                    font.pixelSize: 13; font.bold: true
+                                    elide: Text.ElideRight; Layout.fillWidth: true
                                 }
                                 Label {
                                     text: modelData.address || qsTr("%1, %2")
                                         .arg((modelData.latitude || 0).toFixed(4))
                                         .arg((modelData.longitude || 0).toFixed(4))
-                                    color: root.colorTextSec
-                                    font.pixelSize: 11
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
+                                    color: root.colorTextSec; font.pixelSize: 11
+                                    elide: Text.ElideRight; Layout.fillWidth: true
                                 }
                             }
 
-                            Button {
-                                text: qsTr("导航")
-                                font.pixelSize: 11
-                                Layout.preferredWidth: 48
-                                Layout.preferredHeight: 28
+                            Rectangle {
+                                Layout.preferredWidth: 48; Layout.preferredHeight: 28
+                                radius: 4; color: root.colorPrimary
 
-                                onClicked: navVM.navigateTo(
-                                    modelData.name || "",
-                                    modelData.latitude || 0,
-                                    modelData.longitude || 0)
-
-                                background: Rectangle {
-                                    radius: 4
-                                    color: root.colorPrimary
+                                Label {
+                                    anchors.centerIn: parent
+                                    text: qsTr("导航"); color: "white"; font.pixelSize: 11
                                 }
-                                contentItem: Label {
-                                    text: parent.text
-                                    color: "white"
-                                    font: parent.font
-                                    horizontalAlignment: Text.AlignHCenter
-                                    verticalAlignment: Text.AlignVCenter
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    onClicked: navVM.navigateTo(
+                                        modelData.name || "",
+                                        modelData.latitude || 0,
+                                        modelData.longitude || 0)
                                 }
                             }
                         }
 
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                        }
+                        MouseArea { id: mouseArea; anchors.fill: parent; hoverEnabled: true }
                     }
 
                     Label {
                         anchors.centerIn: parent
-                        text: qsTr("输入关键词搜索地点")
-                        color: root.colorTextSec
-                        font.pixelSize: 13
+                        text: qsTr("输入关键词搜索地点"); color: root.colorTextSec; font.pixelSize: 13
                         visible: resultList.count === 0
                     }
 
                     ScrollBar.vertical: ScrollBar {
-                        active: true
-                        policy: ScrollBar.AsNeeded
+                        active: true; policy: ScrollBar.AsNeeded
                     }
                 }
             }
         }
 
-        // ============================================================
-        // 右侧：地图占位 + 导航信息
-        // ============================================================
-        Rectangle {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            color: root.colorSurface
-            radius: 12
+        // 右侧：地图 + 导航信息
+        SciFiCard {
+            Layout.fillWidth: true; Layout.fillHeight: true
 
             ColumnLayout {
-                anchors {
-                    fill: parent
-                    margins: 24
-                }
+                anchors { fill: parent; margins: 24 }
                 spacing: 16
 
-                // 地图占位区域
                 Rectangle {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.minimumHeight: 160
-                    radius: 12
-                    color: root.colorBg
-                    border.color: root.colorSeparator
+                    Layout.fillWidth: true; Layout.fillHeight: true
+                    Layout.minimumHeight: 160; radius: 12
+                    color: root.colorBg; border.color: root.colorSeparator
 
                     ColumnLayout {
-                        anchors.centerIn: parent
-                        spacing: 8
-
+                        anchors.centerIn: parent; spacing: 8
                         Label {
                             Layout.alignment: Qt.AlignHCenter
-                            text: "\uD83D\uDDFA\uFE0F"
-                            font.pixelSize: 48
+                            text: "\uD83D\uDDFA\uFE0F"; font.pixelSize: 48
                         }
                         Label {
                             Layout.alignment: Qt.AlignHCenter
-                            text: qsTr("地图区域")
-                            color: root.colorTextSec
-                            font.pixelSize: 14
+                            text: qsTr("地图区域"); color: root.colorPrimary; font.pixelSize: 14
+                            opacity: 0.7
                         }
                         Label {
                             Layout.alignment: Qt.AlignHCenter
                             text: qsTr("接入地图SDK后可显示实时地图")
-                            color: root.colorTextSec
-                            font.pixelSize: 11
+                            color: root.colorTextSec; font.pixelSize: 11
                         }
                     }
                 }
 
-                // 导航信息卡片
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: 100
-                    radius: 12
-                    color: navVM.navigating ? root.colorPrimary : root.colorSeparator
-                    opacity: 0.15
+                SciFiCard {
+                    Layout.fillWidth: true; Layout.preferredHeight: 100
 
                     ColumnLayout {
-                        anchors.centerIn: parent
-                        spacing: 6
+                        anchors.centerIn: parent; spacing: 6
 
                         Label {
                             Layout.alignment: Qt.AlignHCenter
                             text: navVM.navigating ? navVM.destination : qsTr("未开始导航")
-                            color: root.colorText
-                            font.pixelSize: 16
-                            font.bold: true
+                            color: navVM.navigating ? root.colorPrimary : root.colorTextSec
+                            font.pixelSize: 16; font.bold: true
                         }
 
                         RowLayout {
-                            Layout.alignment: Qt.AlignHCenter
-                            spacing: 24
+                            Layout.alignment: Qt.AlignHCenter; spacing: 24
                             visible: navVM.navigating
 
-                            ColumnLayout {
-                                spacing: 2
-                                Layout.alignment: Qt.AlignHCenter
-
+                            ColumnLayout { spacing: 2; Layout.alignment: Qt.AlignHCenter
                                 Label {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: navVM.distanceKm.toFixed(1) + " km"
-                                    color: root.colorPrimary
-                                    font.pixelSize: 20
-                                    font.bold: true
+                                    color: root.colorPrimary; font.pixelSize: 20; font.bold: true
                                 }
                                 Label {
                                     Layout.alignment: Qt.AlignHCenter
-                                    text: qsTr("距离")
-                                    color: root.colorTextSec
-                                    font.pixelSize: 11
+                                    text: qsTr("距离"); color: root.colorTextSec; font.pixelSize: 11
                                 }
                             }
-
-                            ColumnLayout {
-                                spacing: 2
-                                Layout.alignment: Qt.AlignHCenter
-
+                            ColumnLayout { spacing: 2; Layout.alignment: Qt.AlignHCenter
                                 Label {
                                     Layout.alignment: Qt.AlignHCenter
                                     text: navVM.etaMinutes + qsTr(" 分钟")
-                                    color: root.colorAccent
-                                    font.pixelSize: 20
-                                    font.bold: true
+                                    color: root.colorAccent; font.pixelSize: 20; font.bold: true
                                 }
                                 Label {
                                     Layout.alignment: Qt.AlignHCenter
-                                    text: qsTr("预计时间")
-                                    color: root.colorTextSec
-                                    font.pixelSize: 11
+                                    text: qsTr("预计时间"); color: root.colorTextSec; font.pixelSize: 11
                                 }
                             }
                         }
                     }
                 }
 
-                // 取消导航
-                Button {
+                Rectangle {
                     Layout.alignment: Qt.AlignHCenter
-                    text: qsTr("取消导航")
-                    font.pixelSize: 12
+                    implicitWidth: 100; implicitHeight: 32; radius: 6
+                    color: root.colorDanger; opacity: 0.8
                     visible: navVM.navigating
-                    implicitWidth: 100
-                    implicitHeight: 32
 
-                    onClicked: navVM.cancelNavigation()
-
-                    background: Rectangle {
-                        radius: 6
-                        color: root.colorDanger
+                    Label {
+                        anchors.centerIn: parent
+                        text: qsTr("取消导航"); color: "white"; font.pixelSize: 12
                     }
-                    contentItem: Label {
-                        text: parent.text
-                        color: "white"
-                        font: parent.font
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
+                    MouseArea {
+                        anchors.fill: parent
+                        onClicked: navVM.cancelNavigation()
                     }
                 }
             }
