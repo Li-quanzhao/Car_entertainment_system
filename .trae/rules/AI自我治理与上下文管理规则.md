@@ -67,10 +67,11 @@ Level 3 - 必须中断并讨论
 
 ```
 Layer 1 - 永久上下文（始终保留）
-  ├─ 技术栈限制（Qt 6.11.1 MinGW、Python 3.13、CMake 4.3.3）
-  ├─ 项目架构（三层架构、通信协议、目录结构）
+  ├─ 技术栈限制（Qt 6.11.1 MSVC/MinGW、Python 3.13、CMake 4.3.3、gRPC）
+  ├─ 项目架构（三层架构、通信协议、目录结构、MSVC 为主工具链）
   ├─ 编码约定（命名风格、Q_PROPERTY 模式、文件组织）
-  └─ 构建命令（Junction 链接、cmake 命令、运行方式）
+  ├─ 构建命令（MSVC Ninja / MinGW Makefiles、cmake 命令、运行方式）
+  └─ 部署（NSSM Windows 服务、pack_hmi.ps1、install_service.ps1）
 
 Layer 2 - 会话上下文（单个开发会话）
   ├─ 当前任务的目标和范围
@@ -344,21 +345,25 @@ private:
 
 | 级别 | 修复项 | 验收标准 | 状态 |
 |------|--------|---------|:----:|
-| **P0** | PlayerVM 接入 MediaService + AudioEngine | 播放列表从 Database 加载、切歌功能可用 | ❌ |
-| **P0** | NavigationPage 重建 UI | POI 搜索 + 结果列表 + 导航信息卡片可交互 | ❌ |
-| **P0** | BluetoothPage 重建 UI | 设备列表 + 连接状态 + 拨号盘可交互 | ❌ |
-| **P0** | VehiclePage 重建 UI | 速度表盘 + 车辆状态卡片展示真实数据 | ❌ |
-| **P0** | SettingsPage 重建 UI + 接入 ConfigManager | 主题/语言/音量设置可持久化 | ❌ |
-| **P0** | BluetoothVM 接入 BluetoothService | 设备扫描/连接/断开功能可用 | ❌ |
-| **P0** | NavVM 接入 MapService | POI 搜索+地点收藏功能可用 | ❌ |
-| **P0** | VehicleVM 接入 VehicleService | 真实车辆数据展示(非随机数) | ❌ |
-| **P1** | MediaService 实现 next/prev | 上下曲切换逻辑完整 | ❌ |
-| **P1** | BluetoothService 实现设备发现+连接管理 | startDiscovery/connect/disconnect 方法完整 | ❌ |
-| **P1** | MapService 实现 searchPoi | POI 搜索返回结果 | ❌ |
+| **P0** | PlayerVM 接入 MediaService + AudioEngine | 播放列表从 Database 加载、切歌功能可用 | ✅ |
+| **P0** | NavigationPage 重建 UI | POI 搜索 + 结果列表 + 导航信息卡片可交互 | ✅ |
+| **P0** | BluetoothPage 重建 UI | 设备列表 + 连接状态 + 拨号盘可交互 | ✅ |
+| **P0** | VehiclePage 重建 UI | 速度表盘 + 车辆状态卡片展示真实数据 | ✅ |
+| **P0** | SettingsPage 重建 UI + 接入 ConfigManager | 主题/语言/音量设置可持久化 | ✅ |
+| **P0** | BluetoothVM 接入 BluetoothService | 设备扫描/连接/断开功能可用 | ✅ |
+| **P0** | NavVM 接入 MapService | POI 搜索+地点收藏功能可用 | ✅ |
+| **P0** | VehicleVM 接入 VehicleService | 真实车辆数据展示(非随机数) | 🔶 |
+| **P1** | MediaService 实现 next/prev | 上下曲切换逻辑完整 | ✅ |
+| **P1** | BluetoothService 实现设备发现+连接管理 | startDiscovery/connect/disconnect 方法完整 | ✅ |
+| **P1** | MapService 实现 searchPoi | POI 搜索返回结果 | ✅ |
 | **P1** | Agent Tools 对接真实 Service | 8 个工具返回真实数据而非 Mock | ❌ |
 
 > **最终停止条件**: P0 全部 ✅ + P1 全部 ✅ → 项目达到部署就绪状态，停止。
 > **P2/P3** (收音机/倒车影像/CarPlay/OTA等量产功能) 属于新需求，不作为当前停止目标。
+>
+> **剩余差距**:
+> - 🔶 **P0-8**: VehicleVM 已连接 VehicleService，但数据源为 `QRandomGenerator` 随机模拟，未接入真实 CAN 总线/传感器
+> - ❌ **P1-12**: Agent Tools (`agent/llm_agent/tools.py`) 8 个工具仍从 `mock_data.json` 读取数据，未对接 HMI backend Service
 
 ---
 
@@ -427,30 +432,36 @@ private:
 ### 构建命令速查
 
 ```powershell
-# 如果 Junction 链接丢失，先执行（管理员 PowerShell）：
-New-Item -ItemType Junction -Path "E:\car_hmi_project" -Target "E:\PyCharmProject\Trae实验\Car_entertainment_system" -Force
+# ==================== HMI (C++ Qt) — MSVC（推荐）====================
+# 在 "Developer PowerShell for VS 2022" 中执行
+cd E:\PyCharmProject\Trae实验\Car_entertainment_system\hmi
+cmake -B build                                    # 首次配置（自动选 Ninja + MSVC）
+cmake --build build                                # 编译
+.\build\Release\car_hmi.exe                        # 运行（MSVC 输出在 Release/ 子目录）
 
-# HMI 首次配置
-cd E:\car_hmi_project\hmi && cmake -B build -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH=E:/Qt/6.11.1/mingw_64
-
-# HMI 重新编译
+# ==================== HMI (C++ Qt) — MinGW（备选）====================
+# 需要 Junction（MinGW 不支持中文路径）：
+# New-Item -ItemType Junction -Path "E:\car_hmi_project" -Target "E:\PyCharmProject\Trae实验\Car_entertainment_system" -Force
+cd E:\car_hmi_project\hmi
+cmake -B build -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH=E:/Qt/6.11.1/mingw_64
 cmake --build build
-
-# HMI 运行
 $env:PATH = "E:\Qt\6.11.1\mingw_64\bin;$env:PATH" && .\build\car_hmi.exe
 
-# Agent 启动
-cd agent && python server.py
+# ==================== Agent (Python) ====================
+cd agent && python server.py                        # HTTP :8000 + gRPC :50051
+python -s -m pytest tests/agent_tests/ -v           # Agent 测试
 
-# Agent 测试
-python -s -m pytest tests/agent_tests/ -v
-
-# 生成 MOC 文件（新增 Q_OBJECT 类后）
-E:\Qt\6.11.1\mingw_64\bin\moc.exe src/infrastructure/xxx.h -o src/infrastructure/moc_xxx.cpp
+# ==================== 生成 proto 文件 ====================
+# C++ (需要 protoc + grpc_cpp_plugin)
+E:\Anoconda\Library\bin\protoc.exe -I agent/proto --cpp_out=hmi/src/infrastructure/proto --grpc_out=hmi/src/infrastructure/proto --plugin=protoc-gen-grpc=E:\Anoconda\Library\bin\grpc_cpp_plugin.exe agent/proto/car_assistant.proto
+# Python
+python -m grpc_tools.protoc -I agent/proto --python_out=agent/proto --grpc_python_out=agent/proto agent/proto/car_assistant.proto
 ```
 
 ### 项目路径
 - 真实路径: `E:\PyCharmProject\Trae实验\Car_entertainment_system`
-- 编译路径（Junction）: `E:\car_hmi_project`
-- Qt 路径: `E:\Qt\6.11.1\mingw_64`
+- 编译路径（Junction，MinGW 专用）: `E:\car_hmi_project`（MSVC 无需，直接支持 UTF-8 路径）
+- Qt MSVC: `E:\Qt\6.11.1\msvc2022_64`
+- Qt MinGW: `E:\Qt\6.11.1\mingw_64`
 - MinGW 路径: `E:\MinGW-w64\mingw64\bin`
+- NSSM: `C:\tools\nssm\nssm.exe`

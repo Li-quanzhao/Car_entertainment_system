@@ -14,7 +14,11 @@ from concurrent import futures
 from typing import Optional
 
 import grpc
-from grpc_reflection.v1alpha import reflection
+try:
+    from grpc_reflection.v1alpha import reflection
+    _HAS_REFLECTION = True
+except Exception:
+    _HAS_REFLECTION = False
 
 # ── Agent 模块导入 ────────────────────────────────────────────
 _agent_dir = os.path.dirname(os.path.abspath(__file__))
@@ -175,11 +179,14 @@ def serve(host: str = "0.0.0.0", port: int = 50051):
     pb2_grpc.add_CarAssistantServicer_to_server(CarAssistantServicer(), server)
 
     # 启用 gRPC 反射（便于调试工具如 grpcurl）
-    SERVICE_NAMES = (
-        pb2_grpc.SERVICE_NAME,
-        reflection.SERVICE_NAME,
-    )
-    reflection.enable_server_reflection(SERVICE_NAMES, server)
+    if _HAS_REFLECTION:
+        SERVICE_NAMES = (
+            'car_assistant.CarAssistant',
+            reflection.SERVICE_NAME,
+        )
+        reflection.enable_server_reflection(SERVICE_NAMES, server)
+    else:
+        logger.warning("gRPC reflection disabled (protobuf version mismatch)")
 
     server.add_insecure_port(f"{host}:{port}")
     logger.info("grpc_server_started", extra={"extra": {"host": host, "port": port}})

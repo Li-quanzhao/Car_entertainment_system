@@ -4,9 +4,9 @@
 # ============================================================
 
 param(
-    [string]$BuildDir = "E:\car_hmi_project\hmi\build",
-    [string]$QtBinDir = "E:\Qt\6.11.1\mingw_64\bin",
-    [string]$AgentDir = "E:\car_hmi_project\agent",
+    [string]$BuildDir = "E:\PyCharmProject\Trae实验\Car_entertainment_system\hmi\build\Release",
+    [string]$QtBinDir = "E:\Qt\6.11.1\msvc2022_64\bin",
+    [string]$AgentDir = "E:\PyCharmProject\Trae实验\Car_entertainment_system\agent",
     [string]$OutputDir = "$PSScriptRoot\dist"
 )
 
