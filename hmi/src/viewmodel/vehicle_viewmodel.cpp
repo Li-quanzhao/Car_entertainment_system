@@ -1,32 +1,33 @@
 #include "vehicle_viewmodel.h"
-#include <QRandomGenerator>
+#include "../service/vehicle_service.h"
 
-VehicleViewModel::VehicleViewModel(QObject *parent)
+VehicleViewModel::VehicleViewModel(VehicleService *service, QObject *parent)
     : QObject(parent)
-    , m_timer(new QTimer(this))
+    , m_service(service)
 {
-    m_timer->setInterval(1000);
-    connect(m_timer, &QTimer::timeout, this, &VehicleViewModel::simulate);
+    connect(m_service, &VehicleService::dataUpdated, this,
+            [this](int speed, int rpm, qreal fuel, int mileage) {
+        m_speed = speed;
+        m_rpm = rpm;
+        m_fuelLevel = fuel;
+        m_mileage = mileage;
+        updateGear();
+        emit dataUpdated();
+    });
 }
 
 void VehicleViewModel::startSimulation()
 {
-    m_timer->start();
+    m_service->startSimulation();
 }
 
 void VehicleViewModel::stopSimulation()
 {
-    m_timer->stop();
+    m_service->stopSimulation();
 }
 
-void VehicleViewModel::simulate()
+void VehicleViewModel::updateGear()
 {
-    auto *rng = QRandomGenerator::global();
-
-    m_speed = qBound(0, m_speed + rng->bounded(-5, 8), 180);
-    m_rpm   = qBound(800, m_rpm + rng->bounded(-200, 300), 7000);
-    m_fuelLevel = qMax(0.0, m_fuelLevel - rng->generateDouble() * 0.002);
-
     if (m_speed == 0) {
         m_gear = QStringLiteral("P");
     } else if (m_speed < 30) {
@@ -38,10 +39,4 @@ void VehicleViewModel::simulate()
     } else {
         m_gear = QStringLiteral("D");
     }
-
-    m_engineTemp = 85.0 + rng->generateDouble() * 10.0;
-    m_doorOpen = rng->bounded(20) == 0;
-    if (m_speed > 0) m_mileage++;
-
-    emit dataUpdated();
 }

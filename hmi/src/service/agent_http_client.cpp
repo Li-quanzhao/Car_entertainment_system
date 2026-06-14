@@ -22,10 +22,26 @@ void AgentHttpClient::setBaseUrl(const QString &url)
     }
 }
 
+void AgentHttpClient::setAuthKey(const QString &key)
+{
+    if (m_authKey != key) {
+        m_authKey = key;
+        emit authKeyChanged(key);
+    }
+}
+
+void AgentHttpClient::setAuthHeader(QNetworkRequest &request) const
+{
+    if (!m_authKey.isEmpty()) {
+        request.setRawHeader("X-API-Key", m_authKey.toUtf8());
+    }
+}
+
 QNetworkReply *AgentHttpClient::get(const QString &endpoint)
 {
     QNetworkRequest request(QUrl(m_baseUrl + endpoint));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    setAuthHeader(request);
     return m_manager->get(request);
 }
 
@@ -33,6 +49,7 @@ QNetworkReply *AgentHttpClient::post(const QString &endpoint, const QJsonObject 
 {
     QNetworkRequest request(QUrl(m_baseUrl + endpoint));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
+    setAuthHeader(request);
     QByteArray data = QJsonDocument(body).toJson(QJsonDocument::Compact);
     return m_manager->post(request, data);
 }

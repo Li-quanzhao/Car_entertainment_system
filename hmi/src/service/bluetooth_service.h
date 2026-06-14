@@ -16,8 +16,21 @@ public:
 
     QVariantList getCallLogs();
 
+public slots:
+    void startDiscovery();
+    void stopDiscovery();
+    void connectToDevice(const QString &address, const QString &name);
+    void disconnectDevice();
+
 signals:
     void callLogsUpdated();
+    void deviceFound(const QString &name, const QString &address);
+    void discoveryFinished();
+    void connected(const QString &name, const QString &address);
+    void disconnected();
+    void connectionChanged(bool connected);
+    void devicesUpdated();
+    void errorOccurred(const QString &error);
 
 private:
     BluetoothAdapter *m_adapter;

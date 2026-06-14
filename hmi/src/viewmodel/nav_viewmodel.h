@@ -6,6 +6,8 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+class MapService;
+
 class NavViewModel : public QObject
 {
     Q_OBJECT
@@ -16,7 +18,7 @@ class NavViewModel : public QObject
     Q_PROPERTY(QVariantList poiResults READ poiResults NOTIFY poiResultsChanged)
 
 public:
-    explicit NavViewModel(QObject *parent = nullptr);
+    explicit NavViewModel(MapService *mapService, QObject *parent = nullptr);
 
     QString destination() const { return m_destination; }
     int etaMinutes() const { return m_etaMinutes; }
@@ -36,6 +38,7 @@ signals:
     void infoMessage(const QString &msg);
 
 private:
+    MapService *m_mapService;
     QString m_destination;
     int m_etaMinutes = 0;
     double m_distanceKm = 0.0;

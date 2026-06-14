@@ -25,9 +25,28 @@ void MediaService::playSong(const QString &path)
     m_audio->play();
 }
 
+void MediaService::setPlaylist(const QVariantList &songs)
+{
+    m_playlist = songs;
+    m_currentIndex = -1;
+}
+
 void MediaService::playIndex(int index)
 {
-    Q_UNUSED(index)
+    if (index < 0 || index >= m_playlist.size()) return;
+    m_currentIndex = index;
+    QVariantMap song = m_playlist[index].toMap();
+    QString path = song["file_path"].toString();
+    if (!path.isEmpty()) {
+        m_audio->setSource(path);
+        m_audio->play();
+    } else {
+        // 无文件路径时仍发出信号（UI 展示歌曲信息）
+        m_audio->play();
+    }
+    emit songChanged(song["title"].toString(),
+                     song["artist"].toString(),
+                     song["duration"].toInt());
 }
 
 void MediaService::togglePlayPause()
@@ -40,10 +59,19 @@ void MediaService::togglePlayPause()
 
 void MediaService::next()
 {
-    Q_UNUSED(this)
+    if (m_playlist.isEmpty()) return;
+    int idx = (m_currentIndex + 1) % m_playlist.size();
+    playIndex(idx);
 }
 
 void MediaService::previous()
 {
-    Q_UNUSED(this)
+    if (m_playlist.isEmpty()) return;
+    int idx = (m_currentIndex - 1 + m_playlist.size()) % m_playlist.size();
+    playIndex(idx);
+}
+
+void MediaService::setVolume(qreal vol)
+{
+    m_audio->setVolume(vol);
 }

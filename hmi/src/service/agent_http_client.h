@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -14,6 +15,7 @@ class AgentHttpClient : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString baseUrl READ baseUrl WRITE setBaseUrl NOTIFY baseUrlChanged)
+    Q_PROPERTY(QString authKey READ authKey WRITE setAuthKey NOTIFY authKeyChanged)
     Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
 
 public:
@@ -24,6 +26,9 @@ public:
 
     QString baseUrl() const { return m_baseUrl; }
     void setBaseUrl(const QString &url);
+
+    QString authKey() const { return m_authKey; }
+    void setAuthKey(const QString &key);
 
     bool connected() const { return m_connected; }
 
@@ -43,6 +48,7 @@ public:
 
 signals:
     void baseUrlChanged(const QString &url);
+    void authKeyChanged(const QString &key);
     void connectedChanged(bool connected);
     void chatResponseReceived(const QString &reply);
     void commandResponseReceived(const QString &message);
@@ -60,10 +66,12 @@ private slots:
 private:
     QNetworkAccessManager *m_manager;
     QString m_baseUrl;
+    QString m_authKey;
     bool m_connected = false;
 
     QNetworkReply *get(const QString &endpoint);
     QNetworkReply *post(const QString &endpoint, const QJsonObject &body);
+    void setAuthHeader(QNetworkRequest &request) const;
 };
 
 #endif // AGENT_HTTP_CLIENT_H

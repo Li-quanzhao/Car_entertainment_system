@@ -9,6 +9,10 @@ load_dotenv()
 HOST = os.getenv("AGENT_HOST", "0.0.0.0")
 PORT = int(os.getenv("AGENT_PORT", "8000"))
 
+# gRPC Server
+GRPC_HOST = os.getenv("GRPC_HOST", "0.0.0.0")
+GRPC_PORT = int(os.getenv("GRPC_PORT", "50051"))
+
 # 会话历史配置
 MAX_HISTORY_TURNS = int(os.getenv("MAX_HISTORY_TURNS", "10"))  # 保留最近 N 轮对话
 
@@ -23,3 +27,7 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3")
 
 # 默认使用云端，不可用时降级到本地
 PREFER_CLOUD = os.getenv("PREFER_CLOUD", "true").lower() == "true"
+
+# 生产部署鉴权
+# 设置后 HMI 请求需在 Header 中携带 X-API-Key: {API_AUTH_KEY}
+API_AUTH_KEY = os.getenv("API_AUTH_KEY", "")

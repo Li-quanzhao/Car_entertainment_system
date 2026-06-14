@@ -5,6 +5,8 @@
 #include <QVariantList>
 #include <QTimer>
 
+class BluetoothService;
+
 class BluetoothViewModel : public QObject
 {
     Q_OBJECT
@@ -14,7 +16,7 @@ class BluetoothViewModel : public QObject
     Q_PROPERTY(bool discovering READ discovering NOTIFY discoveringChanged)
 
 public:
-    explicit BluetoothViewModel(QObject *parent = nullptr);
+    explicit BluetoothViewModel(BluetoothService *service, QObject *parent = nullptr);
 
     QVariantList devices() const { return m_devices; }
     bool connected() const { return m_connected; }
@@ -36,6 +38,7 @@ signals:
     void callStateChanged(const QString &state);
 
 private:
+    BluetoothService *m_service;
     QVariantList m_devices;
     bool m_connected = false;
     bool m_discovering = false;

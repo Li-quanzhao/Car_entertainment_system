@@ -1,37 +1,16 @@
 #include "nav_viewmodel.h"
+#include "../service/map_service.h"
 #include <QRandomGenerator>
 
-NavViewModel::NavViewModel(QObject *parent)
+NavViewModel::NavViewModel(MapService *mapService, QObject *parent)
     : QObject(parent)
+    , m_mapService(mapService)
 {
 }
 
 void NavViewModel::searchPoi(const QString &query)
 {
-    m_poiResults.clear();
-
-    struct POI { const char *name; double lat, lon; };
-    const POI all[] = {
-        {"Shell Gas Station", 22.5431, 114.0579},
-        {"Central Park Plaza", 22.5480, 114.0600},
-        {"Sunshine Mall", 22.5550, 114.0680},
-        {"City Hospital", 22.5380, 114.0520},
-        {"Grand Hotel", 22.5600, 114.0750},
-        {"Tech Park", 22.5450, 114.0450},
-    };
-
-    QString q = query.toLower();
-    for (const auto &poi : all) {
-        QString name = QString::fromUtf8(poi.name);
-        if (name.toLower().contains(q)) {
-            QVariantMap m;
-            m["name"]      = name;
-            m["latitude"]  = poi.lat;
-            m["longitude"] = poi.lon;
-            m_poiResults.append(m);
-        }
-    }
-
+    m_poiResults = m_mapService->searchPoi(query);
     emit poiResultsChanged();
     if (m_poiResults.isEmpty()) {
         emit infoMessage(QStringLiteral("未找到匹配的结果: %1").arg(query));
@@ -42,6 +21,8 @@ void NavViewModel::searchPoi(const QString &query)
 
 void NavViewModel::navigateTo(const QString &name, double lat, double lon)
 {
+    Q_UNUSED(lat)
+    Q_UNUSED(lon)
     m_destination = name;
     m_distanceKm = QRandomGenerator::global()->bounded(3, 25);
     m_etaMinutes = static_cast<int>(m_distanceKm / 0.5);

@@ -42,6 +42,8 @@ add_executable(car_hmi
     # --- Service ---
     src/service/agent_http_client.h
     src/service/agent_http_client.cpp
+    src/service/grpc_client_adapter.h
+    src/service/grpc_client_adapter.cpp
     src/service/config_service.h
     src/service/config_service.cpp
     src/service/media_service.h
@@ -84,6 +86,28 @@ target_link_libraries(car_hmi PRIVATE
     Bthprops
     Ws2_32
 )
+
+# ============================================================
+# gRPC 可选支持（需 Visual Studio + vcpkg install grpc）
+# 取消注释以下块并运行：
+#   cmake -B build -G "MinGW Makefiles" -DCAR_HMI_USE_GRPC=ON
+# ============================================================
+# option(CAR_HMI_USE_GRPC "Build with gRPC client support" OFF)
+# if(CAR_HMI_USE_GRPC)
+#     add_definitions(-DCAR_HMI_USE_GRPC)
+#     find_package(gRPC CONFIG REQUIRED)
+#     find_package(protobuf CONFIG REQUIRED)
+#     target_sources(car_hmi PRIVATE
+#         src/infrastructure/proto/car_assistant.pb.cc
+#     )
+#     target_include_directories(car_hmi PRIVATE
+#         ${CMAKE_CURRENT_SOURCE_DIR}/src/infrastructure
+#     )
+#     target_link_libraries(car_hmi PRIVATE
+#         gRPC::grpc++
+#         protobuf::libprotobuf
+#     )
+# endif()
 
 # ============================================================
 # 单元测试

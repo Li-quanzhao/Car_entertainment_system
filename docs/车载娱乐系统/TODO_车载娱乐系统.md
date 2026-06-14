@@ -95,18 +95,38 @@
   - 运行: `& "E:\car_hmi_project\hmi\build\test_hmi.exe"`
 - Agent 工具链与 HMI 核心基础设施已验证
 
-## P2 待办（未来扩展）
+## P2 已完成
 
-### 10. gRPC 升级
-- 需安装 protobuf + grpcio
-- `proto/car_assistant.proto` 已占位
-- 生成代码: `protoc --cpp_out=hmi/src/infrastructure --python_out=agent proto/car_assistant.proto`
+### 10. gRPC 升级 ✅
+- **proto 定义**: `agent/proto/car_assistant.proto` — 4 个 RPC（GetHealth/ChatQuery/StreamChat/ExecuteTool）
+- **Python gRPC Server**: `agent/grpc_server.py` — 运行在 :50051，复用现有 Agent 逻辑，支持 gRPC 反射
+- **C++ 条件编译适配**: `hmi/src/service/grpc_client_adapter.h/.cpp`
+  - `#ifdef CAR_HMI_USE_GRPC` 时使用完整 gRPC 客户端
+  - 否则退化为桩（stub），不影响现有 HTTP 通信
+- **CMake 配置**: `CMakeLists.txt` 含可选 gRPC 编译块（默认关闭）
+- **C++ protobuf 消息类**: `hmi/src/infrastructure/proto/car_assistant.pb.h/.cc`（由 protoc 生成）
+- **启用完整 gRPC**（需要 Visual Studio + vcpkg）：
+  ```bash
+  cd E:\vcpkg_tmp
+  .\bootstrap-vcpkg.bat
+  .\vcpkg install grpc --triplet x64-mingw-dynamic
+  ```
+  然后在 CMake 取消注释 gRPC 块，重新配置编译。
 
-### 11. 生产部署增强
-- 安装包打包（NSIS / Inno Setup）
-- Agent Server 注册为 Windows 服务（NSSM）
-- 开机自启动脚本
-- Agent 接口鉴权
+### 11. 生产部署增强 ✅
+
+| 功能 | 文件 | 说明 |
+|------|------|------|
+| 打包脚本 | `deploy/pack_hmi.ps1` | 打包 HMI exe + Qt DLL + Agent Python 到 `deploy/dist/` |
+| Windows 服务安装 | `deploy/install_service.ps1` | 使用 NSSM 注册 Agent Server 为 Windows 服务 |
+| Windows 服务卸载 | `deploy/uninstall_service.ps1` | 卸载服务 |
+| 启动/停止脚本 | `deploy/dist/start.bat` / `stop.bat` | 打包后快速启动/停止 |
+| Agent 接口鉴权 | `config.py` + `server.py` + `agent_http_client` | 设置 `API_AUTH_KEY` 后，HMI 自动携带 `X-API-Key` 头 |
+| 环境配置示例 | `agent/.env.example` | .env 配置参考模板 |
+
+**NSSM 服务安装步骤**:
+1. 从 https://nssm.cc/download 下载 NSSM，解压到 `C:\tools\nssm\nssm.exe`
+2. 以管理员身份运行：`PowerShell -File deploy\install_service.ps1`
 
 ## Agent Server 启动方式
 

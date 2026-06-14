@@ -6,3 +6,8 @@ langchain-community>=0.3.0
 langchain-openai>=0.2.0
 python-dotenv>=1.0.0
 pytest>=8.0.0
+# gRPC（后续升级可移除 HTTP）
+grpcio>=1.60.0
+grpcio-tools>=1.60.0
+grpcio-reflection>=1.60.0
+protobuf>=4.25.0

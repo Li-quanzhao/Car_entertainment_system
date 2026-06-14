@@ -33,7 +33,7 @@ if _agent_dir not in sys.path:
 from llm_agent.agent import car_agent
 from llm_agent.session import session_store
 from llm_agent.tools import execute_tool
-from config import HOST, PORT
+from config import HOST, PORT, API_AUTH_KEY
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -159,8 +159,22 @@ app.add_middleware(
 # ── 限流中间件 ────────────────────────────────────────────────
 
 @app.middleware("http")
-async def rate_limit_middleware(request: Request, call_next):
-    # 只对 chat 和 command 端点限流
+async def auth_and_rate_limit_middleware(request: Request, call_next):
+    # 健康检查不需要鉴权和限流
+    if request.url.path == "/api/health":
+        return await call_next(request)
+
+    # API 鉴权（若已配置）
+    if API_AUTH_KEY:
+        client_key = request.headers.get("X-API-Key", "")
+        if client_key != API_AUTH_KEY:
+            logger.warning("auth_failed", extra={"extra": {"path": request.url.path, "client_ip": request.client.host if request.client else "unknown"}})
+            return JSONResponse(
+                status_code=401,
+                content={"error": "Unauthorized: invalid or missing X-API-Key"},
+            )
+
+    # 限流
     if request.url.path in ("/api/chat", "/api/chat/stream", "/api/command"):
         client_ip = request.client.host if request.client else "unknown"
         if not rate_limiter.is_allowed(client_ip):

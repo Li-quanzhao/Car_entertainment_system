@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QTimer>
 
+class VehicleService;
+
 class VehicleViewModel : public QObject
 {
     Q_OBJECT
@@ -16,7 +18,7 @@ class VehicleViewModel : public QObject
     Q_PROPERTY(QString gear READ gear NOTIFY dataUpdated)
 
 public:
-    explicit VehicleViewModel(QObject *parent = nullptr);
+    explicit VehicleViewModel(VehicleService *service, QObject *parent = nullptr);
 
     int speed() const { return m_speed; }
     int rpm() const { return m_rpm; }
@@ -34,8 +36,9 @@ signals:
     void dataUpdated();
 
 private:
-    void simulate();
+    void updateGear();
 
+    VehicleService *m_service;
     int m_speed = 0;
     int m_rpm = 0;
     qreal m_fuelLevel = 0.75;
@@ -43,7 +46,6 @@ private:
     double m_engineTemp = 90.0;
     bool m_doorOpen = false;
     QString m_gear = QStringLiteral("P");
-    QTimer *m_timer;
 };
 
 #endif // VEHICLE_VIEWMODEL_H

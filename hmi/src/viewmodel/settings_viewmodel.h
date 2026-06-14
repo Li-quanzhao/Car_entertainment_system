@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QStringList>
 
+class ConfigManager;
+
 class SettingsViewModel : public QObject
 {
     Q_OBJECT
@@ -14,7 +16,7 @@ class SettingsViewModel : public QObject
     Q_PROPERTY(QStringList themes READ themes CONSTANT)
 
 public:
-    explicit SettingsViewModel(QObject *parent = nullptr);
+    explicit SettingsViewModel(ConfigManager *config, QObject *parent = nullptr);
 
     QString theme() const { return m_theme; }
     void setTheme(const QString &theme);
@@ -32,6 +34,7 @@ signals:
     void infoMessage(const QString &msg);
 
 private:
+    ConfigManager *m_config;
     QString m_theme = QStringLiteral("dark");
     QString m_language = QStringLiteral("zh");
     qreal m_volume = 0.5;

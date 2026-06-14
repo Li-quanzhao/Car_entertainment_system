@@ -7,6 +7,8 @@
 #include <QVariantMap>
 #include <QTimer>
 
+class MediaService;
+
 class PlayerViewModel : public QObject
 {
     Q_OBJECT
@@ -20,7 +22,7 @@ class PlayerViewModel : public QObject
     Q_PROPERTY(QVariantList playlist READ playlist NOTIFY playlistChanged)
 
 public:
-    explicit PlayerViewModel(QObject *parent = nullptr);
+    explicit PlayerViewModel(MediaService *mediaService, QObject *parent = nullptr);
 
     QString title() const { return m_title; }
     QString artist() const { return m_artist; }
@@ -39,7 +41,7 @@ public slots:
     void next();
     void previous();
     void playIndex(int index);
-    void loadDemoSongs();
+    void loadPlaylist();
 
 signals:
     void songChanged();
@@ -50,6 +52,9 @@ signals:
     void playlistChanged();
 
 private:
+    void applySong(const QString &title, const QString &artist, int duration);
+
+    MediaService *m_service;
     QString m_title;
     QString m_artist;
     QString m_album;

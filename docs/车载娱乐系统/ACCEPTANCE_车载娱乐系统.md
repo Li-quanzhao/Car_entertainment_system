@@ -8,8 +8,10 @@
 |----|:----:|------|
 | HMI CMake 配置 | ✅ | MinGW Makefiles, Qt 6.11.1 |
 | HMI 编译 | ✅ | `[100%] Built target car_hmi` |
-| Agent 依赖安装 | ✅ | 7 个依赖全部已安装 |
+| HMI 测试编译 | ✅ | `[100%] Built target test_hmi` |
+| Agent 依赖安装 | ✅ | 12 个依赖全部已安装 |
 | Agent 模块导入 | ✅ | agent.py / tools.py / session.py 均可导入 |
+| gRPC Server 导入 | ✅ | grpc_server.py → CarAssistantServicer 导入正常 |
 
 ### 2. 功能完整性
 
@@ -32,6 +34,11 @@
 | TA3 | LLM Agent 核心 | ✅ | create_agent + Mock 降级 |
 | TA4 | 工具链定义 | ✅ | 8个工具 + Pydantic Schema |
 | T13 | 集成联调 | ✅ | C++ ↔ Python 接口对齐 |
+| T14 | HMI 单元测试 | ✅ | test_config.cpp, 8/8 通过 |
+| T15 | Agent 单元测试 | ✅ | test_tools.py, 11/11 通过 |
+| **P2-1** | **en.ts 英文翻译** | ✅ | 29 条翻译 + lrelease 生成 en.qm |
+| **P2-2** | **gRPC 升级** | ✅ | Python Server + C++ 条件编译适配 |
+| **P2-3** | **生产部署增强** | ✅ | 打包脚本 + NSSM 服务 + API 鉴权 |
 
 ### 3. 验收标准对照
 
@@ -49,6 +56,9 @@
 | Agent 对话界面 | ✅ | 消息气泡 + 输入框 + 模拟回复 |
 | Agent 3端点可用 | ✅ | health/chat/command |
 | 无 API Key 自动降级 | ✅ | MockLLM 模式，关键词回复 |
+| gRPC 通信可用 | ✅ | Python Server :50051 + C++ 条件编译适配层 |
+| API 鉴权 | ✅ | X-API-Key 头验证，配置后生效 |
+| 打包部署 | ✅ | `deploy/pack_hmi.ps1` + NSSM 服务脚本 |
 
 ### 4. 编译警告
 
@@ -60,5 +70,6 @@
 
 1. **无蓝牙/串口硬件联调** — BluetoothAdapter/SerialPortAdapter 已编码但未在真实硬件上验证
 2. **Agent 无真实 API Key** — 默认 Mock 模式，填入 .env 的 OPENAI_API_KEY 后自动切换真实 LLM
-3. **QML 国际化** — qsTr() 已标注，但 .ts/.qm 翻译文件未生成（需 lrelease 工具）
-4. **无单元测试** — T14/T15 未执行，需安装 Qt Test / pytest 后编写
+3. **gRPC C++ 完整模式** — 需要 Visual Studio + vcpkg 安装 gRPC 后取消注释 CMake 配置；当前 C++ 端使用 HTTP 客户端作为主要通信方式，gRPC 为退化 stub
+4. **单元测试** — HMI Qt Test 8/8 通过，Agent pytest 11/11 通过
+5. **NSSM 服务** — 需手动从 nssm.cc 下载 NSSM 到 `C:\tools\nssm\`
