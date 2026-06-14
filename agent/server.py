@@ -303,8 +303,29 @@ def _log_req(endpoint: str, req):
 
 
 # ═══════════════════════════════════════════════════════════════
-# 入口
+# 入口 — HTTP + gRPC 双协议并行运行
 # ═══════════════════════════════════════════════════════════════
 
+def _start_grpc_server():
+    """在后台线程启动 gRPC 服务器"""
+    import threading
+    from config import GRPC_HOST, GRPC_PORT
+
+    def _run():
+        import grpc_server
+        grpc_server.serve(GRPC_HOST, GRPC_PORT)
+
+    thread = threading.Thread(target=_run, name="grpc-server", daemon=True)
+    thread.start()
+    logger.info("grpc_server_starting", extra={"extra": {"host": GRPC_HOST, "port": GRPC_PORT}})
+    return thread
+
+
 if __name__ == "__main__":
+    # 尝试启动 gRPC 服务器（失败不影响 HTTP 服务）
+    try:
+        _start_grpc_server()
+    except Exception as e:
+        logger.warning("grpc_server_failed", extra={"extra": {"error": str(e)}})
+
     uvicorn.run(app, host=HOST, port=PORT)

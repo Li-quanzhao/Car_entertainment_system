@@ -15,15 +15,12 @@
 
 // ── 前向声明（避免未安装 gRPC 时编译错误）────────────────────
 #ifdef CAR_HMI_USE_GRPC
+#include "proto/car_assistant.pb.h"
+#include "proto/car_assistant.grpc.pb.h"
+
 namespace grpc {
 class Channel;
-class ClientContext;
 }  // namespace grpc
-
-namespace car_assistant {
-class CarAssistant;
-class CarAssistantStub;
-}  // namespace car_assistant
 #endif
 
 class GrpcClientAdapter : public QObject
@@ -73,7 +70,7 @@ private:
     bool m_connected = false;
 
 #ifdef CAR_HMI_USE_GRPC
-    std::unique_ptr<car_assistant::CarAssistantStub> m_stub;
+    std::unique_ptr<car_assistant::CarAssistant::Stub> m_stub;
     std::shared_ptr<grpc::Channel> m_channel;
 
     void ensureChannel();

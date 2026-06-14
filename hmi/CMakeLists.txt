@@ -4,8 +4,18 @@ project(CarHMI VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Qt6 路径
-set(CMAKE_PREFIX_PATH "E:/Qt/6.11.1/mingw_64")
+# ============================================================
+# 工具链自动检测 & Qt6 路径适配
+#   MSVC  →  E:/Qt/6.11.1/msvc2022_64  + gRPC C++ 自动启用
+#   MinGW →  E:/Qt/6.11.1/mingw_64      + gRPC C++ 自动跳过（Python gRPC 服务器不受影响）
+# ============================================================
+if(MSVC)
+    set(QT_SUFFIX "msvc2022_64")
+else()
+    set(QT_SUFFIX "mingw_64")
+endif()
+set(QT_ROOT "E:/Qt/6.11.1")
+set(CMAKE_PREFIX_PATH "${QT_ROOT}/${QT_SUFFIX}")
 
 # 启用 Qt 自动处理
 set(CMAKE_AUTOMOC ON)
@@ -88,26 +98,48 @@ target_link_libraries(car_hmi PRIVATE
 )
 
 # ============================================================
-# gRPC 可选支持（需 Visual Studio + vcpkg install grpc）
-# 取消注释以下块并运行：
-#   cmake -B build -G "MinGW Makefiles" -DCAR_HMI_USE_GRPC=ON
+# gRPC 可选支持
+# 自动检测 gRPC + protobuf，找到即启用，未找到则降级为 HTTP-only 模式
+# 需 Visual Studio + vcpkg: vcpkg install grpc protobuf --triplet x64-windows
 # ============================================================
-# option(CAR_HMI_USE_GRPC "Build with gRPC client support" OFF)
-# if(CAR_HMI_USE_GRPC)
-#     add_definitions(-DCAR_HMI_USE_GRPC)
-#     find_package(gRPC CONFIG REQUIRED)
-#     find_package(protobuf CONFIG REQUIRED)
-#     target_sources(car_hmi PRIVATE
-#         src/infrastructure/proto/car_assistant.pb.cc
-#     )
-#     target_include_directories(car_hmi PRIVATE
-#         ${CMAKE_CURRENT_SOURCE_DIR}/src/infrastructure
-#     )
-#     target_link_libraries(car_hmi PRIVATE
-#         gRPC::grpc++
-#         protobuf::libprotobuf
-#     )
-# endif()
+find_package(gRPC CONFIG QUIET)
+find_package(protobuf CONFIG QUIET)
+# 尝试找到 OpenSSL（gRPC 依赖，即便使用 insecure credentials）
+if(gRPC_FOUND)
+    find_package(OpenSSL QUIET)
+    if(NOT OpenSSL_FOUND)
+        # 尝试 Anaconda 自带的 OpenSSL
+        if(EXISTS "$ENV{CONDA_PREFIX}/Library")
+            set(OPENSSL_ROOT_DIR "$ENV{CONDA_PREFIX}/Library")
+            find_package(OpenSSL QUIET)
+        endif()
+    endif()
+endif()
+if(gRPC_FOUND AND protobuf_FOUND AND OpenSSL_FOUND)
+    if(NOT MINGW)
+        # gRPC C++ 需要 MSVC 工具链（Anaconda gRPC 库将 -ignore:4221 等 MSVC 标志注入所有传递依赖）
+        # MinGW 编译时跳过 C++ gRPC，Python gRPC 服务器继续可用
+        message(STATUS "gRPC found — enabling gRPC client support")
+        add_definitions(-DCAR_HMI_USE_GRPC)
+        target_sources(car_hmi PRIVATE
+            src/infrastructure/proto/car_assistant.pb.cc
+            src/infrastructure/proto/car_assistant.grpc.pb.cc
+        )
+        target_include_directories(car_hmi PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/infrastructure
+        )
+        target_link_libraries(car_hmi PRIVATE
+            gRPC::grpc++
+            protobuf::libprotobuf
+            OpenSSL::SSL
+            OpenSSL::Crypto
+        )
+    else()
+        message(STATUS "gRPC found but MinGW detected — C++ gRPC disabled (Python gRPC server remains available). Build with MSVC to enable.")
+    endif()
+else()
+    message(STATUS "gRPC not found — HMI uses HTTP/JSON (gRPC server still available in Agent)")
+endif()
 
 # ============================================================
 # 单元测试
@@ -127,3 +159,12 @@ target_link_libraries(test_hmi PRIVATE
     Qt6::Test
     Qt6::Network
 )
+
+# ============================================================
+# 构建摘要
+# ============================================================
+if(MSVC)
+    message(STATUS "Build config: MSVC |  gRPC C++: ${gRPC_FOUND}")
+else()
+    message(STATUS "Build config: MinGW |  gRPC C++: disabled (Python gRPC server available at :50051)")
+endif()
